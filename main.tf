@@ -1,6 +1,16 @@
+variable "project" {
+    description = "The project ID to deploy into"
+    default = "cloud-vpc-terraform"
+}
+
+variable "region" {
+    description = "The region to deploy into"
+    default = "us-east1"
+}
+
 provider "google" {
-  project = "cloud-vpc-terraform"
-  region  = "us-east1"
+  project = var.project
+  region  = var.region
 }
 
 resource "google_compute_network" "vpc" {
@@ -13,14 +23,14 @@ resource "google_compute_network" "vpc" {
 resource "google_compute_subnetwork" "webapp_subnet" {
   name          = "webapp"
   ip_cidr_range = "10.0.1.0/24"
-  region        = "us-east1"
+  region        = var.region
   network       = google_compute_network.vpc.id
 }
 
 resource "google_compute_subnetwork" "db_subnet" {
   name          = "db"
   ip_cidr_range = "10.0.2.0/24"
-  region        = "us-east1"
+  region        = var.region
   network       = google_compute_network.vpc.id
 }
 

@@ -7,7 +7,7 @@ Commands Used to Create terraform files :
 terraform init 
 terraform validate
 terraform plan 
-terraform apply
+terraform apply -var="project=my-gcp-project" -var="region=us-east1"
 ```
 
 
