@@ -1,0 +1,20 @@
+# This Workflow will Validate the Terraform Configuration Files
+
+name: Terraform
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: terraform init
+      - name: Validate
+        run: terraform validate
