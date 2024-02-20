@@ -50,4 +50,3 @@ resource "google_compute_route" "webapp_route" {
   network          = google_compute_network.vpc.id
   next_hop_gateway = "default-internet-gateway"
   priority         = 1000
-}
