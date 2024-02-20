@@ -8,16 +8,26 @@ variable "region" {
     default = "us-east1"
 }
 
+variable "vpc-name" {
+    description = "The name of the VPC"
+    default = "csye6225-vpc"
+}
+
+variable "routing_mode" {
+    description = "The routing mode for the VPC"
+    default = "REGIONAL"
+}
+
 provider "google" {
   project = var.project
   region  = var.region
 }
 
 resource "google_compute_network" "vpc" {
-  name                    = "csye6225-vpc"
+  name                    = var.vpc-name
   auto_create_subnetworks = false
   delete_default_routes_on_create = true
-  routing_mode            = "REGIONAL"
+  routing_mode            = var.routing_mode
 }
 
 resource "google_compute_subnetwork" "webapp_subnet" {
