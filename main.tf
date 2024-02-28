@@ -18,10 +18,11 @@ resource "google_compute_subnetwork" "webapp_subnet" {
 }
 
 resource "google_compute_subnetwork" "db_subnet" {
-  name          = var.db_subnet_name
-  ip_cidr_range = var.db_subnet_cidr
-  region        = var.zone
-  network       = google_compute_network.vpc.id
+  name                     = var.db_subnet_name
+  ip_cidr_range            = var.db_subnet_cidr
+  region                   = var.zone
+  network                  = google_compute_network.vpc.id
+  private_ip_google_access = true
 }
 
 resource "google_compute_route" "webapp_route" {
@@ -45,14 +46,82 @@ resource "google_compute_firewall" "http-permissions" {
   source_ranges = var.http_permissions_source_ranges
 }
 
-resource "google_compute_firewall" "deny_ssh" {
-  name    = var.deny_ssh_name
+#resource "google_compute_firewall" "deny_ssh" {
+#  name    = var.deny_ssh_name
+#  network = google_compute_network.vpc.name
+#
+#  deny {
+#    protocol = var.deny_ssh_protocol
+#    ports    = var.deny_ssh_ports
+#  }
+#
+#  source_ranges = var.deny_ssh_source_ranges
+#}
+
+resource "google_compute_firewall" "allow_db_access" {
+  name    = "allow-db-access"
   network = google_compute_network.vpc.name
 
-  deny {
-    protocol = var.deny_ssh_protocol
-    ports    = var.deny_ssh_ports
+  allow {
+    protocol = "tcp"
+    ports    = ["5432"] # Postgres
   }
 
-  source_ranges = var.deny_ssh_source_ranges
+  source_tags = ["db-access"]
+}
+
+resource "google_compute_global_address" "private_ip" {
+  #  provider     = google-beta
+  project       = var.project
+  name          = "private-ip"
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  network       = google_compute_network.vpc.self_link
+  prefix_length = 16
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = google_compute_network.vpc.id
+  reserved_peering_ranges = [google_compute_global_address.private_ip.name]
+  service                 = "servicenetworking.googleapis.com"
+  #  depends_on              = [google_compute_global_address.private_ip]
+}
+
+resource "google_sql_database_instance" "db_instance" {
+  name                = var.db_instance_name
+  region              = var.zone
+  database_version    = var.database_version
+  depends_on          = [google_service_networking_connection.private_vpc_connection]
+  deletion_protection = false
+  settings {
+    tier              = var.tier
+    availability_type = var.availability_type
+    disk_type         = var.disk_type
+    disk_size         = 100
+
+    ip_configuration {
+      ipv4_enabled    = false
+      private_network = google_compute_network.vpc.id
+    }
+  }
+}
+
+resource "google_sql_database" "database" {
+  instance = google_sql_database_instance.db_instance.name
+  name     = "webapp"
+}
+
+resource "random_password" "password" {
+  length  = 8
+  special = false
+}
+
+resource "google_sql_user" "db_user" {
+  name     = "webapp"
+  instance = google_sql_database_instance.db_instance.name
+  password = random_password.password.result
+}
+
+data "google_sql_database_instance" "db_instance" {
+  name = google_sql_database_instance.db_instance.name
 }

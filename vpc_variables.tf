@@ -75,7 +75,7 @@ variable "http_permissions_protocol" {
 
 variable "http_permissions_ports" {
   description = "The ports for the http permissions firewall rule"
-  default     = ["8080"]
+  default     = ["8080", "22"]
 }
 
 variable "http_permissions_source_ranges" {
