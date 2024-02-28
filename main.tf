@@ -46,17 +46,17 @@ resource "google_compute_firewall" "http-permissions" {
   source_ranges = var.http_permissions_source_ranges
 }
 
-#resource "google_compute_firewall" "deny_ssh" {
-#  name    = var.deny_ssh_name
-#  network = google_compute_network.vpc.name
-#
-#  deny {
-#    protocol = var.deny_ssh_protocol
-#    ports    = var.deny_ssh_ports
-#  }
-#
-#  source_ranges = var.deny_ssh_source_ranges
-#}
+resource "google_compute_firewall" "deny_ssh" {
+  name    = var.deny_ssh_name
+  network = google_compute_network.vpc.name
+
+  deny {
+    protocol = var.deny_ssh_protocol
+    ports    = var.deny_ssh_ports
+  }
+
+  source_ranges = var.deny_ssh_source_ranges
+}
 
 resource "google_compute_firewall" "allow_db_access" {
   name    = "allow-db-access"
