@@ -1,3 +1,7 @@
+locals {
+  connection_string = "postgresql://${google_sql_user.db_user.name}:${random_password.password.result}@${google_sql_database_instance.db_instance.ip_address[0].ip_address}/${google_sql_database.database.name}"
+}
+
 resource "google_compute_instance" "web-server" {
   name         = var.instance_name
   machine_type = var.machine_type
@@ -19,5 +23,16 @@ resource "google_compute_instance" "web-server" {
     access_config {
       network_tier = var.network_tier
     }
+  }
+
+  metadata = {
+    startup-script = <<-EOT
+    #!/bin/bash
+    echo "POSTGRES_CONN_STR=${local.connection_string}" > /usr/bin/webapp.env
+    sudo chown csye6225:csye6225 /usr/bin/webapp.env
+    sudo chmod 644 /usr/bin/webapp.env
+    touch /tmp/webapp.flag
+    sudo systemctl restart webapp.service
+    EOT
   }
 }
