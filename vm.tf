@@ -36,3 +36,11 @@ resource "google_compute_instance" "web-server" {
     EOT
   }
 }
+
+resource "google_dns_record_set" "a_record" {
+  name         = "girishkulkarni.me."
+  type         = "A"
+  ttl          = 300
+  managed_zone = "girish-kulkarni-me"
+  rrdatas      = [google_compute_instance.web-server.network_interface[0].access_config[0].nat_ip]
+}
