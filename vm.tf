@@ -2,6 +2,37 @@ locals {
   connection_string = "postgresql://${google_sql_user.db_user.name}:${random_password.password.result}@${google_sql_database_instance.db_instance.ip_address[0].ip_address}/${google_sql_database.database.name}"
 }
 
+resource "google_service_account" "service_account" {
+  account_id   = "monitoring-agent"
+  display_name = "Monitoring Account Agent"
+}
+
+resource "google_project_iam_binding" "logging_admin" {
+  project = var.project
+  role    = "roles/logging.admin"
+
+  members = [
+    "serviceAccount:${google_service_account.service_account.email}",
+  ]
+
+  lifecycle {
+    ignore_changes = [members]
+  }
+}
+
+resource "google_project_iam_binding" "monitoring_metric_writer" {
+  project = var.project
+  role    = "roles/monitoring.metricWriter"
+
+  members = [
+    "serviceAccount:${google_service_account.service_account.email}",
+  ]
+
+  lifecycle {
+    ignore_changes = [members]
+  }
+}
+
 resource "google_compute_instance" "web-server" {
   name         = var.instance_name
   machine_type = var.machine_type
@@ -33,14 +64,24 @@ resource "google_compute_instance" "web-server" {
     sudo chmod 644 /usr/bin/webapp.env
     touch /tmp/webapp.flag
     sudo systemctl restart webapp.service
+    sudo usermod -a -G csye6225 google-logging-agent
+    sudo chmod 640 /var/log/webapp/webapp.log
+    sudo systemctl restart google-cloud-ops-agent
     EOT
+    google-logging-enabled = "true"
   }
+
+    service_account {
+        email  = google_service_account.service_account.email
+        scopes = var.scopes
+    }
 }
 
 resource "google_dns_record_set" "a_record" {
-  name         = "girishkulkarni.me."
+  name         = var.dns_name
   type         = "A"
-  ttl          = 300
-  managed_zone = "girish-kulkarni-me"
+  ttl          = var.ttl
+  managed_zone = var.managed_zone
   rrdatas      = [google_compute_instance.web-server.network_interface[0].access_config[0].nat_ip]
 }
+
