@@ -10,7 +10,7 @@ variable "machine_type" {
 
 variable "boot_disk_image" {
   description = "The boot disk image for the instance"
-  default     = "projects/cloud-csye6225-dev/global/images/webapp-image-20240228191039"
+  default     = "projects/cloud-csye6225-dev/global/images/webapp-image-20240320004436"
 }
 
 variable "boot_disk_type" {
@@ -71,4 +71,28 @@ variable "availability_type" {
 variable "disk_type" {
   description = "The disk type for the database instance"
   default     = "pd-ssd"
+}
+
+variable "scopes" {
+  description = "The scopes for the service account"
+  type        = list(string)
+  default     = ["https://www.googleapis.com/auth/monitoring.write", "https://www.googleapis.com/auth/logging.admin"]
+}
+
+variable "dns_name" {
+  description = "The DNS name for the A record"
+  type        = string
+  default     = "girishkulkarni.me."
+}
+
+variable "ttl" {
+  description = "The time to live for the DNS record"
+  type        = number
+  default     = 300
+}
+
+variable "managed_zone" {
+  description = "The managed zone for the DNS record"
+  type        = string
+  default     = "girish-kulkarni-me"
 }
