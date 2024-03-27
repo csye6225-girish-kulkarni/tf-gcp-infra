@@ -125,3 +125,10 @@ resource "google_sql_user" "db_user" {
 data "google_sql_database_instance" "db_instance" {
   name = google_sql_database_instance.db_instance.name
 }
+
+resource "google_vpc_access_connector" "vpc_connector" {
+  name          = "vpc-connector"
+  region        = var.zone
+  network       = google_compute_network.vpc.name
+  ip_cidr_range = "10.10.0.0/28"
+}

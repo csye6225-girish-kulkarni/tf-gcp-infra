@@ -10,7 +10,7 @@ variable "machine_type" {
 
 variable "boot_disk_image" {
   description = "The boot disk image for the instance"
-  default     = "projects/cloud-csye6225-dev/global/images/webapp-image-20240320004436"
+  default     = "projects/cloud-csye6225-dev/global/images/webapp-image-20240326184717"
 }
 
 variable "boot_disk_type" {
@@ -76,7 +76,11 @@ variable "disk_type" {
 variable "scopes" {
   description = "The scopes for the service account"
   type        = list(string)
-  default     = ["https://www.googleapis.com/auth/monitoring.write", "https://www.googleapis.com/auth/logging.admin"]
+  default     = [
+    "https://www.googleapis.com/auth/monitoring.write",
+    "https://www.googleapis.com/auth/logging.admin",
+    "https://www.googleapis.com/auth/pubsub"
+  ]
 }
 
 variable "dns_name" {
