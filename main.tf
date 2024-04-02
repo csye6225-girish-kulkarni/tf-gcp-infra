@@ -46,6 +46,18 @@ resource "google_compute_firewall" "http-permissions" {
   source_ranges = var.http_permissions_source_ranges
 }
 
+resource "google_compute_firewall" "allow_https" {
+  name    = "allow-https"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
 resource "google_compute_firewall" "deny_ssh" {
   name    = var.deny_ssh_name
   network = google_compute_network.vpc.name
