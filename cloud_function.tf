@@ -1,7 +1,7 @@
 # Create a Google Cloud Storage bucket
 resource "google_storage_bucket" "bucket" {
-  name     = "email_verification_cloud"
-  location = "US"
+  name     = var.bucket_name
+  location = var.bucket_location
   uniform_bucket_level_access = true
 }
 
@@ -13,20 +13,20 @@ resource "google_storage_bucket" "bucket" {
 #}
 
 resource "google_storage_bucket_object" "archive" {
-   name   = "objects"
+   name   = var.object_name
   bucket = google_storage_bucket.bucket.name
-  source = "serverless.zip"
+  source = var.source_file
 }
 
 # Create a Google Cloud Function 2nd gen
 resource "google_cloudfunctions2_function" "function" {
-  name        = "email-sender"
+  name        = var.function_name
   location    = var.zone
-  description = "Cloud Function which sends email to the user"
+  description = var.function_description
 
   build_config {
-    runtime     = "go121"
-    entry_point = "ConsumeSendEmailEvent"
+    runtime     = var.runtime
+    entry_point = var.entry_point
     source {
       storage_source {
         bucket = google_storage_bucket.bucket.name
