@@ -78,10 +78,6 @@ variable "http_permissions_ports" {
   default     = ["8080", "22"]
 }
 
-variable "http_permissions_source_ranges" {
-  description = "The source ranges for the http permissions firewall rule"
-  default     = ["0.0.0.0/0"]
-}
 
 variable "deny_ssh_name" {
   description = "The name of the deny ssh firewall rule"
@@ -91,6 +87,16 @@ variable "deny_ssh_name" {
 variable "deny_ssh_protocol" {
   description = "The protocol for the deny ssh firewall rule"
   default     = "tcp"
+}
+
+variable "health_check_ip_range1" {
+  description = "The first IP range for the health check"
+  default     = "130.211.0.0/22"
+}
+
+variable "health_check_ip_range2" {
+  description = "The second IP range for the health check"
+  default     = "35.191.0.0/16"
 }
 
 variable "deny_ssh_ports" {
