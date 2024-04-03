@@ -33,51 +33,6 @@ resource "google_project_iam_binding" "monitoring_metric_writer" {
   }
 }
 
-#resource "google_compute_instance" "web-server" {
-#  name         = var.instance_name
-#  machine_type = var.machine_type
-#  zone         = var.vm_zone
-#  tags         = var.vm_tags
-#
-#  boot_disk {
-#    initialize_params {
-#      image = var.boot_disk_image
-#      size  = var.boot_disk_size
-#      type  = var.boot_disk_type
-#    }
-#  }
-#
-#  network_interface {
-#    network    = google_compute_network.vpc.id
-#    subnetwork = google_compute_subnetwork.webapp_subnet.id
-#
-#    access_config {
-#      network_tier = var.network_tier
-#    }
-#  }
-#
-#  metadata = {
-#    startup-script = <<-EOT
-#    #!/bin/bash
-#    echo "POSTGRES_CONN_STR=${local.connection_string}" > /usr/bin/webapp.env
-#    sudo chown csye6225:csye6225 /usr/bin/webapp.env
-#    sudo chmod 644 /usr/bin/webapp.env
-#    touch /tmp/webapp.flag
-#    sudo systemctl restart webapp.service
-#    sudo usermod -a -G csye6225 google-logging-agent
-#    sudo chmod 640 /var/log/webapp/webapp.log
-#    sudo systemctl restart google-cloud-ops-agent
-#    EOT
-#    google-logging-enabled = "true"
-#  }
-#
-#    service_account {
-#        email  = google_service_account.service_account.email
-#        scopes = var.scopes
-#    }
-#}
-
-# TODO: Change the url in the webapp for verify email
 resource "google_dns_record_set" "a_record" {
   name         = var.dns_name
   type         = "A"
@@ -87,7 +42,7 @@ resource "google_dns_record_set" "a_record" {
 }
 
 # Compute Instance Template
-resource "google_compute_instance_template" "web-server-template" {
+resource "google_compute_region_instance_template" "web-server-template" {
   name_prefix  = var.instance_name
   machine_type = var.machine_type
 
@@ -150,7 +105,7 @@ resource "google_compute_health_check" "health_check" {
 # Regional Compute Instance Group Manager
 resource "google_compute_region_instance_group_manager" "instance_group_manager" {
   name               = "instance-group-manager"
-  region             = "us-east1"
+  region             = var.zone
   base_instance_name = "webapp"
 #  instance_template  = google_compute_instance_template.web-server-template.self_link
   target_size        = 1
@@ -166,7 +121,7 @@ resource "google_compute_region_instance_group_manager" "instance_group_manager"
   }
 
   version {
-    instance_template = google_compute_instance_template.web-server-template.self_link
+    instance_template = google_compute_region_instance_template.web-server-template.self_link
     name              = "v1"
   }
 
@@ -176,16 +131,16 @@ resource "google_compute_region_instance_group_manager" "instance_group_manager"
 # Compute Autoscaler
 resource "google_compute_region_autoscaler" "autoscaler" {
   name   = "autoscaler"
-  region   = "us-east1"
+  region   = var.zone
   target = google_compute_region_instance_group_manager.instance_group_manager.self_link
 
   autoscaling_policy {
-    max_replicas    = 3
-    min_replicas    = 1
-    cooldown_period = 60
+    max_replicas    = var.max_replicas
+    min_replicas    = var.min_replicas
+    cooldown_period = var.cooldown_period
 
     cpu_utilization {
-      target = 0.05
+      target = var.cpu_utilization_target
     }
   }
 
@@ -217,21 +172,21 @@ resource "google_compute_url_map" "url_map" {
   default_service = google_compute_backend_service.backend_service.self_link
 
   host_rule {
-    hosts        = ["girishkulkarni.me"]
-    path_matcher = "allpaths"
+    hosts        = var.hosts
+    path_matcher = var.path_matcher
   }
 
   path_matcher {
-    name            = "allpaths"
+    name            = var.path_matcher
     default_service = google_compute_backend_service.backend_service.self_link
   }
 }
 
 resource "google_compute_managed_ssl_certificate" "default" {
-  name = "webapp-cert"
+  name = var.ssl_cert_name
 
   managed {
-    domains = ["girishkulkarni.me."]
+    domains = var.domains
   }
 }
 

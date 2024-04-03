@@ -10,7 +10,7 @@ variable "machine_type" {
 
 variable "boot_disk_image" {
   description = "The boot disk image for the instance"
-  default     = "projects/cloud-csye6225-dev/global/images/webapp-image-20240326184717"
+  default     = "projects/cloud-csye6225-dev/global/images/webapp-image-20240402234336"
 }
 
 variable "boot_disk_type" {
@@ -99,4 +99,46 @@ variable "managed_zone" {
   description = "The managed zone for the DNS record"
   type        = string
   default     = "girish-kulkarni-me"
+}
+
+variable "max_replicas" {
+  description = "The maximum number of replicas for autoscaling"
+  default     = 3
+}
+
+variable "min_replicas" {
+  description = "The minimum number of replicas for autoscaling"
+  default     = 1
+}
+
+variable "cooldown_period" {
+  description = "The cooldown period for autoscaling"
+  default     = 60
+}
+
+variable "cpu_utilization_target" {
+  description = "The target CPU utilization for autoscaling"
+  default     = 0.05
+}
+
+variable "hosts" {
+  description = "The hosts for the URL map"
+  type        = list(string)
+  default     = ["girishkulkarni.me"]
+}
+
+variable "path_matcher" {
+  description = "The path matcher for the URL map"
+  default     = "allpaths"
+}
+
+variable "ssl_cert_name" {
+  description = "The name of the SSL certificate"
+  default     = "webapp-cert"
+}
+
+variable "domains" {
+  description = "The domains for the managed SSL certificate"
+  type        = list(string)
+  default     = ["girishkulkarni.me."]
 }
