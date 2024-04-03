@@ -142,3 +142,21 @@ variable "domains" {
   type        = list(string)
   default     = ["girishkulkarni.me."]
 }
+
+variable "balancing_mode" {
+  description = "The balancing mode for the backend service."
+  type        = string
+  default     = "UTILIZATION"
+}
+
+variable "capacity_scaler" {
+  description = "The capacity scaler for the backend service."
+  type        = number
+  default     = 1.0
+}
+
+variable "max_utilization" {
+  description = "The maximum utilization for the backend service."
+  type        = number
+  default     = 0.05
+}

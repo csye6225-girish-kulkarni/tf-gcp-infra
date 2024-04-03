@@ -161,6 +161,9 @@ resource "google_compute_backend_service" "backend_service" {
 
   backend {
     group = google_compute_region_instance_group_manager.instance_group_manager.instance_group
+    balancing_mode = var.balancing_mode
+    capacity_scaler = var.capacity_scaler
+    max_utilization = var.max_utilization
   }
 
   health_checks = [google_compute_health_check.health_check.self_link]
