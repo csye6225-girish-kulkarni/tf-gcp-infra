@@ -15,6 +15,7 @@ resource "google_compute_subnetwork" "webapp_subnet" {
   ip_cidr_range = var.webapp_subnet_cidr
   region        = var.zone
   network       = google_compute_network.vpc.id
+  private_ip_google_access = true
 }
 
 resource "google_compute_subnetwork" "db_subnet" {
@@ -43,7 +44,7 @@ resource "google_compute_firewall" "http-permissions" {
     ports    = var.http_permissions_ports
   }
 
-  source_ranges = var.http_permissions_source_ranges
+  source_ranges = [google_compute_global_forwarding_rule.http_forwarding_rule.ip_address, var.health_check_ip_range1, var.health_check_ip_range2]
 }
 
 resource "google_compute_firewall" "allow_https" {
@@ -55,8 +56,21 @@ resource "google_compute_firewall" "allow_https" {
     ports    = ["443"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = [google_compute_global_forwarding_rule.http_forwarding_rule.ip_address, var.health_check_ip_range1, var.health_check_ip_range2]
 }
+
+#resource "google_compute_firewall" "allow_sql_admin_api" {
+#  name    = "allow-sql-admin-api"
+#  network = google_compute_network.vpc.name
+#
+#  allow {
+#    protocol = "tcp"
+#    ports    = ["443"]
+#  }
+#
+#  direction = "EGRESS"
+#  destination_ranges = ["0.0.0.0/0"]
+#}
 
 resource "google_compute_firewall" "deny_ssh" {
   name    = var.deny_ssh_name
