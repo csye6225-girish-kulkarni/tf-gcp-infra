@@ -79,7 +79,8 @@ variable "scopes" {
   default     = [
     "https://www.googleapis.com/auth/monitoring.write",
     "https://www.googleapis.com/auth/logging.admin",
-    "https://www.googleapis.com/auth/pubsub"
+    "https://www.googleapis.com/auth/pubsub",
+    "https://www.googleapis.com/auth/cloudkms"
   ]
 }
 
