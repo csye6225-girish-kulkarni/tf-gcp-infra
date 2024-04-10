@@ -3,6 +3,14 @@ resource "google_storage_bucket" "bucket" {
   name     = var.bucket_name
   location = var.bucket_location
   uniform_bucket_level_access = true
+  storage_class = "REGIONAL"
+
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.bucket_crypto_key.id
+  }
+  depends_on = [
+    google_kms_crypto_key_iam_binding.bucket_crypto_key_iam_binding
+  ]
 }
 
 #resource "google_storage_bucket_iam_member" "bucket_iam_member" {

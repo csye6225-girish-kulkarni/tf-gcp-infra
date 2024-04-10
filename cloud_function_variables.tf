@@ -15,7 +15,7 @@ variable "bucket_name" {
 
 variable "bucket_location" {
   description = "The location of the Google Cloud Storage bucket"
-  default     = "US"
+  default     = "us-east1"
 }
 
 variable "object_name" {

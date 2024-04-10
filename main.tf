@@ -3,6 +3,11 @@ provider "google" {
   region  = var.zone
 }
 
+provider "google-beta" {
+  project = var.project
+  region  = var.zone
+}
+
 resource "google_compute_network" "vpc" {
   name                            = var.vpc-name
   auto_create_subnetworks         = false
@@ -117,7 +122,7 @@ resource "google_sql_database_instance" "db_instance" {
   name                = var.db_instance_name
   region              = var.zone
   database_version    = var.database_version
-  depends_on          = [google_service_networking_connection.private_vpc_connection]
+  depends_on          = [google_service_networking_connection.private_vpc_connection, google_kms_crypto_key_iam_binding.sql_crypto_key_iam_binding]
   deletion_protection = false
   settings {
     tier              = var.tier
@@ -130,6 +135,8 @@ resource "google_sql_database_instance" "db_instance" {
       private_network = google_compute_network.vpc.id
     }
   }
+
+  encryption_key_name = google_kms_crypto_key.sql_crypto_key.id
 }
 
 resource "google_sql_database" "database" {

@@ -50,6 +50,9 @@ resource "google_compute_region_instance_template" "web-server-template" {
     source_image = var.boot_disk_image
     auto_delete  = true
     boot         = true
+    disk_encryption_key {
+      kms_key_self_link = google_kms_crypto_key.vm_crypto_key.id
+    }
   }
 
   network_interface {
